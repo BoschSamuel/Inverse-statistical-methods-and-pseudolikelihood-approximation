@@ -18,7 +18,7 @@ int main(int argc, const char * argv[]) {
     mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
     int max_spin = 21; // max value spin can take
-    int N = 20; //Number of atoms in molecule
+    int N = 50; //Number of atoms in molecule
     double T = 300; // This is the temperature of the experiment
     // double K_b = 1.38064852e-23; // Boltzman constant
     double K_b = 0.008;
