@@ -29,7 +29,7 @@ int main(int argc, const char * argv[]) {
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
     uniform_int_distribution<int> random_atom(0,N-1); // definition of random function
     
-    array<std::array<double, 525>, 525> data;
+    array<std::array<double, 525>, 525> J;
     ifstream myfile;
     myfile.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation_of_physical_systems/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/J.txt");
     if(!myfile) //Testing if file is actually open.
@@ -41,8 +41,8 @@ int main(int argc, const char * argv[]) {
     }
     for (int i = 0; i < 525; i++){
         for(int j = 0; j < 525; ++j){
-            myfile >> data[i][j]; // Here we read the file number by number
-            // cout << data[i][j] << '\t';
+            myfile >> J[i][j]; // Here we read the file number by number
+            // cout << J[i][j] << '\t';
         }
         // cout << endl;
     }
@@ -58,34 +58,42 @@ int main(int argc, const char * argv[]) {
     
     // Calculation of the energy using Pott's model (H = -J*sum(Kronecker_delta(i,j))
     //cout << "\nTotal energy = ";
-    int E = 0;
+    double E = 0.0;
     for(int i=0; i<N; i++){
         for(int j=i+1; j<N; j++){
-            if(v[i] == v[j]){
-                E = E-1;
+            // if(v[i] == v[j]){
+            //    E = E-1;
+            // }
+            if (abs(J[21*i+v[i]][21*j+v[j]]) > 0){
+                E = E - J[21*i+v[i]][21*j+v[j]];
+                // cout << J[21*i+v[i]][21*j+v[j]] << '\n';
             }
         }
     }
-    cout << E << "\n\n";
+    cout << "\nEnergy(initial)" << " = " << E << "\n\n";
 
     //cout << "\nStarting random iterations...\n";
-    int max_number_of_interations = 50;
+    int max_number_of_interations = 1000000;
     for(int iteration_number=0; iteration_number<max_number_of_interations; iteration_number++){
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
         int old_spin = v[atom_number]; //Saving old spin in case we still want to use it
         //cout << "Atom is = " << atom_number << " Spin was = " << old_spin;
-        int E_old = E;
+        double E_old = E;
         v[atom_number] = random_spin(rng); //Pick random new spin for selected atom
         //cout << " and now is = " << v[atom_number] << '\n';
         if(v[atom_number] == old_spin){
             continue; // If the spin didn't change, we do nothing
         }
         // Calculation of the new energy
-        E = 0;
+        E = 0.0;
         for(int i=0; i<N; i++){
             for(int j=i+1; j<N; j++){
-                if(v[i] == v[j]){
-                    E = E-1;
+                //if(v[i] == v[j]){
+                //    E = E-1;
+                //}
+                if (abs(J[21*i+v[i]][21*j+v[j]]) > 0){
+                    E = E - J[21*i+v[i]][21*j+v[j]];
+                    // cout << J[21*i+v[i]][21*j+v[j]] << '\n';
                 }
             }
         }
@@ -103,8 +111,7 @@ int main(int argc, const char * argv[]) {
         }else{
             //cout << "Energy decreased\n";
         }
-        //cout << "Energy now is = " << E << "\n\n";
-        cout << E << '\n';
+        cout << "Energy(" << iteration_number << ")" << " = " << E << "\n";
     }
     
     
