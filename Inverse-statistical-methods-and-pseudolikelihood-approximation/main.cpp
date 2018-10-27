@@ -9,21 +9,43 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include <array>
+#include <fstream>
+#include <iomanip>
+#include <string>
 
 using namespace std;
 
 
 int main(int argc, const char * argv[]) {
-    random_device rd;     // only used once to initialise (seed) engine
-    mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+    random_device rd;  // only used once to initialise (seed) engine
+    mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
     int max_spin = 21; // max value spin can take
-    int N = 50; //Number of atoms in molecule
-    double T = 300; // This is the temperature of the experiment
+    int N = 25;        //Number of atoms in molecule
+    double T = 1;      // This is the temperature of the experiment
     // double K_b = 1.38064852e-23; // Boltzman constant
-    double K_b = 0.008;
+    double K_b = 1;
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
     uniform_int_distribution<int> random_atom(0,N-1); // definition of random function
+    
+    array<std::array<double, 525>, 525> data;
+    ifstream myfile;
+    myfile.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation_of_physical_systems/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/J.txt");
+    if(!myfile) //Testing if file is actually open.
+    {
+        cout << "Error opening output file" << endl;
+        return -1;
+    }else{
+        cout << "File 'J.txt' is open" << '\n';
+    }
+    for (int i = 0; i < 525; i++){
+        for(int j = 0; j < 525; ++j){
+            myfile >> data[i][j]; // Here we read the file number by number
+            // cout << data[i][j] << '\t';
+        }
+        // cout << endl;
+    }
     
     // Random initialization of spins
     //cout << "Initial random distribution:\n";
@@ -47,7 +69,7 @@ int main(int argc, const char * argv[]) {
     cout << E << "\n\n";
 
     //cout << "\nStarting random iterations...\n";
-    int max_number_of_interations = 10000;
+    int max_number_of_interations = 50;
     for(int iteration_number=0; iteration_number<max_number_of_interations; iteration_number++){
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
         int old_spin = v[atom_number]; //Saving old spin in case we still want to use it
