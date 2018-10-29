@@ -21,9 +21,9 @@ int main(int argc, const char * argv[]) {
     random_device rd;  // only used once to initialise (seed) engine
     mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
-    int max_spin = 21; // max value spin can take
+    int max_spin = 20; // max value spin can take
     int N = 25;        //Number of atoms in molecule
-    double T = 1;      // This is the temperature of the experiment
+    double T = 0.0001;      // This is the temperature of the experiment
     // double K_b = 1.38064852e-23; // Boltzman constant
     double K_b = 1;
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
@@ -31,9 +31,9 @@ int main(int argc, const char * argv[]) {
 
     array<std::array<double, 525>, 525> J;
     ifstream myfile;
-    myfile.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation_of_physical_systems/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/J.txt");
+    myfile.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/J.txt");
     if(!myfile){ //Testing if file is actually open.
-        cout << "Error opening output file" << endl;
+        cout << "Error opening file" << endl;
         return -1;
     }else{
         cout << "File 'J.txt' is open" << "\n\n";
@@ -58,14 +58,14 @@ int main(int argc, const char * argv[]) {
     for(int i=0; i<N; i++){
         for(int j=i+1; j<N; j++){
             if (abs(J[21*i+v[i]][21*j+v[j]]) > 0){
-                E = E - J[21*i+v[i]][21*j+v[j]]; // Is this the right formula for calculating the energy?
+                E = E + J[21*i+v[i]][21*j+v[j]]; // Is this the right formula for calculating the energy?
             }
         }
     }
     cout << "\nEnergy(initial)" << " = " << E << "\n\n";
 
     //cout << "\nStarting random iterations...\n";
-    int max_number_of_interations = 10000;
+    int max_number_of_interations = 1000000;
     int iteration_number = 0;
     for(; iteration_number<max_number_of_interations; iteration_number++){
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
@@ -81,10 +81,10 @@ int main(int argc, const char * argv[]) {
                 continue;
             }
             if (abs(J[21*i+v[i]][21*atom_number+v[atom_number]]) > 0){
-                E = E - J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
+                E = E + J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
             }
             if (abs(J[21*i+v[i]][21*atom_number+old_spin]) > 0){
-                E = E + J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
+                E = E - J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
             }
         }
 
