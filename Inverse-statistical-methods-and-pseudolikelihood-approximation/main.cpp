@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
     int min_spin = 0;  // min value spin can take
     int max_spin = 20; // max value spin can take
     int N = 25;        //Number of atoms in molecule
-    double T = 0.0001;      // This is the temperature of the experiment
+    double T = 1;  // This is the temperature of the experiment
     // double K_b = 1.38064852e-23; // Boltzman constant
     double K_b = 1;
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
@@ -57,9 +57,7 @@ int main(int argc, const char * argv[]) {
     double E = 0.0;
     for(int i=0; i<N; i++){
         for(int j=i+1; j<N; j++){
-            if (abs(J[21*i+v[i]][21*j+v[j]]) > 0){
-                E = E + J[21*i+v[i]][21*j+v[j]]; // Is this the right formula for calculating the energy?
-            }
+            E = E + J[21*i+v[i]][21*j+v[j]]; // Is this the right formula for calculating the energy?
         }
     }
     cout << "\nEnergy(initial)" << " = " << E << "\n\n";
@@ -80,12 +78,8 @@ int main(int argc, const char * argv[]) {
             if (atom_number==i){
                 continue;
             }
-            if (abs(J[21*i+v[i]][21*atom_number+v[atom_number]]) > 0){
-                E = E + J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
-            }
-            if (abs(J[21*i+v[i]][21*atom_number+old_spin]) > 0){
-                E = E - J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
-            }
+            E = E + J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
+            E = E - J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
         }
 
         if(E > E_old){
