@@ -17,7 +17,7 @@
 using namespace std;
 
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char * argv[]){
     random_device rd;  // only used once to initialise (seed) engine
     mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
@@ -63,9 +63,12 @@ int main(int argc, const char * argv[]) {
     cout << "\nEnergy(initial)" << " = " << E << "\n\n";
 
     //cout << "\nStarting random iterations...\n";
-    int max_number_of_interations = 1000000;
+    int energy_change_counter = 0;
+    int max_number_of_interations = 10000;
+    vector<double> Energy(max_number_of_interations);
     int iteration_number = 0;
     for(; iteration_number<max_number_of_interations; iteration_number++){
+        Energy[energy_change_counter] = E;
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
         int old_spin = v[atom_number]; //Saving old spin in case we still want to use it
         double E_old = E;
@@ -91,12 +94,18 @@ int main(int argc, const char * argv[]) {
                 v[atom_number] = old_spin;
             }
         }
+        energy_change_counter++;
     }
 
     cout << "Final spin configuration:\n";
     for(int i=0; i<N; i++){
         cout << v[i] << ' ';
     }
+    cout << '\n';
+    for(int iteration_number=0; iteration_number<energy_change_counter; iteration_number++){
+        cout << Energy[iteration_number] << '\n';
+    }
+    
     cout << endl;
     cout << "Energy(" << iteration_number << ")" << " = " << E << "\n";
     cout << '\n';
