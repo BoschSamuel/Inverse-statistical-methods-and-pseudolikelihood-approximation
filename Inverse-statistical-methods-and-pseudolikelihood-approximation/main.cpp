@@ -113,6 +113,19 @@ int main(int argc, const char * argv[]){
     double mean = accumulate(begin(Energy), end(Energy), 0.0) / Energy.size();
     //cout << "Average Energy = " << mean << '\n';
     
+    
+    // Writing the Energy vs step number into a .txt file
+    // The specific path was need, as it is otherwise saved in the xcode hidden folder 
+    ofstream energy_file;
+    energy_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Energy_vs_time.txt");
+    if (myfile.is_open()) { cout << "File is open\n"; }
+    for(int i=0; i<energy_change_counter; i++){
+        energy_file << Energy[i] << '\n';
+    }
+    energy_file.close();
+    
+    
+    
 // Autocorrelation function
     double autocorrelation_fraction = 0.03; // Through what fraction of the data do you want the autocorr. function to go?
     vector<double> autocorrelation((int)(autocorrelation_fraction*energy_change_counter));
