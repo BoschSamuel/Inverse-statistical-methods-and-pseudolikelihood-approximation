@@ -103,12 +103,39 @@ int main(int argc, const char * argv[]){
     }
     cout << '\n';
     for(int iteration_number=0; iteration_number<energy_change_counter; iteration_number++){
-        cout << Energy[iteration_number] << '\n';
+        // cout << Energy[iteration_number] << '\n';
     }
     
     cout << endl;
-    cout << "Energy(" << iteration_number << ")" << " = " << E << "\n";
+    //cout << "Energy(" << iteration_number << ")" << " = " << E << "\n";
     cout << '\n';
+
+    double mean = accumulate(begin(Energy), end(Energy), 0.0) / Energy.size();
+    //cout << "Average Energy = " << mean << '\n';
+    
+// Autocorrelation function
+    double autocorrelation_fraction = 0.03; // Through what fraction of the data do you want the autocorr. function to go?
+    vector<double> autocorrelation((int)(autocorrelation_fraction*energy_change_counter));
+    cout << int(autocorrelation_fraction*energy_change_counter) << '\n';
+    for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
+        autocorrelation[i] = 0;
+        for(int j=0; j<energy_change_counter-i; j++){
+            autocorrelation[i] += Energy[j]*Energy[j+i] - mean*mean;
+        }
+        if (energy_change_counter-i>0){
+            autocorrelation[i] /= (energy_change_counter-i);
+        }
+    }
+    double normalisation_factor = autocorrelation[0];
+    for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
+        autocorrelation[i] /= normalisation_factor;
+    }
+
+    cout << "\n\n\n\n\n\n\n" << "autocorrelation:" << '\n';
+    for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
+        cout << autocorrelation[i] << '\n';
+    }
+    
     
     return 0;
 }
