@@ -115,10 +115,10 @@ int main(int argc, const char * argv[]){
     
     
     // Writing the Energy vs step number into a .txt file
-    // The specific path was need, as it is otherwise saved in the xcode hidden folder 
+    // The specific path was need, as it is otherwise saved in the xcode hidden folder
     ofstream energy_file;
     energy_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Energy_vs_time.txt");
-    if (myfile.is_open()) { cout << "File is open\n"; }
+    if (myfile.is_open()) { cout << "File 'Energy_vs_time.txt' is open\n"; }
     for(int i=0; i<energy_change_counter; i++){
         energy_file << Energy[i] << '\n';
     }
@@ -129,7 +129,6 @@ int main(int argc, const char * argv[]){
 // Autocorrelation function
     double autocorrelation_fraction = 0.03; // Through what fraction of the data do you want the autocorr. function to go?
     vector<double> autocorrelation((int)(autocorrelation_fraction*energy_change_counter));
-    cout << int(autocorrelation_fraction*energy_change_counter) << '\n';
     for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
         autocorrelation[i] = 0;
         for(int j=0; j<energy_change_counter-i; j++){
@@ -144,9 +143,30 @@ int main(int argc, const char * argv[]){
         autocorrelation[i] /= normalisation_factor;
     }
 
-    cout << "\n\n\n\n\n\n\n" << "autocorrelation:" << '\n';
-    for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
-        cout << autocorrelation[i] << '\n';
+    // activate the following lines if you want to get the autocorrelation printed
+    // cout << "\n\n\n\n" << "autocorrelation:" << '\n';
+    // for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
+        // cout << autocorrelation[i] << '\n';
+    // }
+    
+    
+    // The blocking method analysis
+    int n = 10; //number of blocks
+    vector<double> block_averages(n);
+    double sum = 0;
+    int k = int(energy_change_counter/n);
+    int j = 0;
+    for (int i=0; i<energy_change_counter; i++){
+        sum += Energy[i];
+        if (i==k){
+            block_averages[j] = sum/(int(energy_change_counter/n));
+            sum = 0;
+            k += int(energy_change_counter/n);
+            j++;
+        }
+    }
+    for (int i=0; i<n; i++){
+        cout << block_averages[i] << '\n';
     }
     
     
