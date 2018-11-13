@@ -64,7 +64,7 @@ int main(int argc, const char * argv[]){
 
     //cout << "\nStarting random iterations...\n";
     int energy_change_counter = 0;
-    int max_number_of_interations = 10000;
+    int max_number_of_interations = 100000;
     vector<double> Energy(max_number_of_interations);
     int iteration_number = 0;
     for(; iteration_number<max_number_of_interations; iteration_number++){
@@ -118,7 +118,7 @@ int main(int argc, const char * argv[]){
     // The specific path was need, as it is otherwise saved in the xcode hidden folder
     ofstream energy_file;
     energy_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Energy_vs_time.txt");
-    if (myfile.is_open()) { cout << "File 'Energy_vs_time.txt' is open\n"; }
+    if (myfile.is_open()) { cout << "File 'Energy_vs_time.txt' is open\n\n"; }
     for(int i=0; i<energy_change_counter; i++){
         energy_file << Energy[i] << '\n';
     }
@@ -165,6 +165,7 @@ int main(int argc, const char * argv[]){
             j++;
         }
     }
+    cout << "Blocking method analysis with " << n << " blocks:\n";
     for (int i=0; i<n; i++){
         cout << block_averages[i] << '\n';
     }
