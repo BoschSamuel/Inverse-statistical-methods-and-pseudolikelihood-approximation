@@ -119,6 +119,7 @@ int main(int argc, const char * argv[]){
     ofstream energy_file;
     energy_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Energy_vs_time.txt");
     if (myfile.is_open()) { cout << "File 'Energy_vs_time.txt' is open\n\n"; }
+    energy_file << N << '\n';
     for(int i=0; i<energy_change_counter; i++){
         energy_file << Energy[i] << '\n';
     }
