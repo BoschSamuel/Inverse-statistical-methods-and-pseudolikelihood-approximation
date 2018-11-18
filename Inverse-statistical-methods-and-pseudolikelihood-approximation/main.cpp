@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <math.h>
 
 using namespace std;
 
@@ -151,7 +152,9 @@ int main(int argc, const char * argv[]){
     
     // The blocking method analysis
     int n = 10; //number of blocks
+    n++;
     vector<double> block_averages(n);
+    vector<double> block_std(n);
     double sum = 0;
     int k = int(max_number_of_interations/n);
     int j = 0;
@@ -164,9 +167,21 @@ int main(int argc, const char * argv[]){
             j++;
         }
     }
-    cout << "Blocking method analysis with " << n << " blocks:\n";
-    for (int i=0; i<n; i++){
-        cout << block_averages[i] << '\n';
+    sum = 0;
+    j = 0;
+    k = int(max_number_of_interations/n);
+    for (int i=0; i<max_number_of_interations; i++){
+        sum += pow((Energy[i]-block_averages[j]),2);
+        if (i==k){
+            block_std[j] = sqrt(sum/(int(max_number_of_interations/n)-1));
+            sum = 0;
+            k += int(max_number_of_interations/n);
+            j++;
+        }
+    }
+    cout << "Blocking method analysis with " << n-1 << " blocks:\n";
+    for (int i=0; i<n-1; i++){
+        cout << "E[block " << i+1 << "] = " << block_averages[i] << " +/- " << block_std[i] << '\n';
     }
     
     cout << "energy change counter = " << iteration_number;
