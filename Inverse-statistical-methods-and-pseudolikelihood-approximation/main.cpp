@@ -63,12 +63,11 @@ int main(int argc, const char * argv[]){
     cout << "\nEnergy(initial)" << " = " << E << "\n\n";
 
     //cout << "\nStarting random iterations...\n";
-    int energy_change_counter = 0;
     int max_number_of_interations = 100000;
     vector<double> Energy(max_number_of_interations);
     int iteration_number = 0;
     for(; iteration_number<max_number_of_interations; iteration_number++){
-        Energy[energy_change_counter] = E;
+        Energy[iteration_number] = E;
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
         int old_spin = v[atom_number]; //Saving old spin in case we still want to use it
         double E_old = E;
@@ -94,7 +93,6 @@ int main(int argc, const char * argv[]){
                 v[atom_number] = old_spin;
             }
         }
-        energy_change_counter++;
     }
 
     cout << "Final spin configuration:\n";
@@ -102,7 +100,7 @@ int main(int argc, const char * argv[]){
         cout << v[i] << ' ';
     }
     cout << '\n';
-    for(int iteration_number=0; iteration_number<energy_change_counter; iteration_number++){
+    for(int iteration_number=0; iteration_number<max_number_of_interations; iteration_number++){
         // cout << Energy[iteration_number] << '\n';
     }
     
@@ -120,7 +118,7 @@ int main(int argc, const char * argv[]){
     energy_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Energy_vs_time.txt");
     if (myfile.is_open()) { cout << "File 'Energy_vs_time.txt' is open\n\n"; }
     energy_file << N << '\n';
-    for(int i=0; i<energy_change_counter; i++){
+    for(int i=0; i<max_number_of_interations; i++){
         energy_file << Energy[i] << '\n';
     }
     energy_file.close();
@@ -129,18 +127,18 @@ int main(int argc, const char * argv[]){
     
 // Autocorrelation function
     double autocorrelation_fraction = 0.03; // Through what fraction of the data do you want the autocorr. function to go?
-    vector<double> autocorrelation((int)(autocorrelation_fraction*energy_change_counter));
-    for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
+    vector<double> autocorrelation((int)(autocorrelation_fraction*max_number_of_interations));
+    for(int i=0; i<int(autocorrelation_fraction*max_number_of_interations); i++){
         autocorrelation[i] = 0;
-        for(int j=0; j<energy_change_counter-i; j++){
+        for(int j=0; j<max_number_of_interations-i; j++){
             autocorrelation[i] += Energy[j]*Energy[j+i] - mean*mean;
         }
-        if (energy_change_counter-i>0){
-            autocorrelation[i] /= (energy_change_counter-i);
+        if (max_number_of_interations-i>0){
+            autocorrelation[i] /= (max_number_of_interations-i);
         }
     }
     double normalisation_factor = autocorrelation[0];
-    for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
+    for(int i=0; i<int(autocorrelation_fraction*max_number_of_interations); i++){
         autocorrelation[i] /= normalisation_factor;
     }
 
@@ -155,14 +153,14 @@ int main(int argc, const char * argv[]){
     int n = 10; //number of blocks
     vector<double> block_averages(n);
     double sum = 0;
-    int k = int(energy_change_counter/n);
+    int k = int(max_number_of_interations/n);
     int j = 0;
-    for (int i=0; i<energy_change_counter; i++){
+    for (int i=0; i<max_number_of_interations; i++){
         sum += Energy[i];
         if (i==k){
-            block_averages[j] = sum/(int(energy_change_counter/n));
+            block_averages[j] = sum/(int(max_number_of_interations/n));
             sum = 0;
-            k += int(energy_change_counter/n);
+            k += int(max_number_of_interations/n);
             j++;
         }
     }
@@ -171,6 +169,6 @@ int main(int argc, const char * argv[]){
         cout << block_averages[i] << '\n';
     }
     
-    
+    cout << "energy change counter = " << iteration_number;
     return 0;
 }
