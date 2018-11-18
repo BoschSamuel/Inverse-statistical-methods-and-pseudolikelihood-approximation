@@ -143,11 +143,19 @@ int main(int argc, const char * argv[]){
         autocorrelation[i] /= normalisation_factor;
     }
 
-    // activate the following lines if you want to get the autocorrelation printed
-    // cout << "\n\n\n\n" << "autocorrelation:" << '\n';
-    // for(int i=0; i<int(autocorrelation_fraction*energy_change_counter); i++){
-        // cout << autocorrelation[i] << '\n';
-    // }
+    
+    // Writing the autocorrelation function into a .txt file
+    // The specific path was need, as it is otherwise saved in the xcode hidden folder
+    ofstream autocorrelation_file;
+    autocorrelation_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Autocorrelation.txt");
+    if (autocorrelation_file.is_open()) { cout << "File 'Autocorrelation.txt' is open\n\n"; }
+    for(int i=0; i<int(autocorrelation_fraction*max_number_of_interations); i++){
+        autocorrelation_file << autocorrelation[i] << '\n';
+    }
+    autocorrelation_file.close();
+    
+    
+    
     
     
     // The blocking method analysis
