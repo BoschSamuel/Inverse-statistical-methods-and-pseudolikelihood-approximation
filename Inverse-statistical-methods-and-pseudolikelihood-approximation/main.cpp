@@ -155,9 +155,6 @@ int main(int argc, const char * argv[]){
     autocorrelation_file.close();
     
     
-    
-    
-    
     // The blocking method analysis
     int n = 10; //number of blocks
     n++;
