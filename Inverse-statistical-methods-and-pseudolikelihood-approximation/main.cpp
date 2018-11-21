@@ -18,6 +18,103 @@
 using namespace std;
 
 
+
+// calculate the cofactor of element (row,col)
+int GetMinor(double **src, double **dest, int row, int col, int order)
+{
+    // indicate which col and row is being copied to dest
+    int colCount=0,rowCount=0;
+    
+    for(int i = 0; i < order; i++ )
+    {
+        if( i != row )
+        {
+            colCount = 0;
+            for(int j = 0; j < order; j++ )
+            {
+                // when j is not the element
+                if( j != col )
+                {
+                    dest[rowCount][colCount] = src[i][j];
+                    colCount++;
+                }
+            }
+            rowCount++;
+        }
+    }
+    
+    return 1;
+}
+
+// Calculate the determinant recursively.
+double CalcDeterminant( double **mat, int order)
+{
+    // order must be >= 0
+    // stop the recursion when matrix is a single element
+    if( order == 1 )
+        return mat[0][0];
+    
+    // the determinant value
+    double det = 0;
+    
+    // allocate the cofactor matrix
+    double **minor;
+    minor = new double*[order-1];
+    for(int i=0;i<order-1;i++)
+        minor[i] = new double[order-1];
+    
+    for(int i = 0; i < order; i++ )
+    {
+        // get minor of element (0,i)
+        GetMinor( mat, minor, 0, i , order);
+        // the recusion is here!
+        
+        det += (i%2==1?-1.0:1.0) * mat[0][i] * CalcDeterminant(minor,order-1);
+        //det += pow( -1.0, i ) * mat[0][i] * CalcDeterminant( minor,order-1 );
+    }
+    
+    // release memory
+    for(int i=0;i<order-1;i++)
+        delete [] minor[i];
+    delete [] minor;
+    
+    return det;
+}
+
+
+// matrix inversioon
+// the result is put in Y
+void MatrixInversion(double **A, int order, double **Y)
+{
+    // get the determinant of a
+    double det = 1.0/CalcDeterminant(A,order);
+    
+    // memory allocation
+    double *temp = new double[(order-1)*(order-1)];
+    double **minor = new double*[order-1];
+    for(int i=0;i<order-1;i++)
+        minor[i] = temp+(i*(order-1));
+    
+    for(int j=0;j<order;j++)
+    {
+        for(int i=0;i<order;i++)
+        {
+            // get the co-factor (matrix) of A(j,i)
+            GetMinor(A,minor,j,i,order);
+            Y[i][j] = det*CalcDeterminant(minor,order-1);
+            if( (i+j)%2 == 1)
+                Y[i][j] = -Y[i][j];
+        }
+    }
+    
+    // release memory
+    //delete [] minor[0];
+    delete [] temp;
+    delete [] minor;
+}
+
+
+
 int main(int argc, const char * argv[]){
     random_device rd;  // only used once to initialise (seed) engine
     mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
@@ -30,7 +127,7 @@ int main(int argc, const char * argv[]){
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
     uniform_int_distribution<int> random_atom(0,N-1); // definition of random function
 
-    array<std::array<double, 525>, 525> J;
+    array<array<double, 525>, 525> J;
     ifstream myfile;
     myfile.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/J.txt");
     if(!myfile){ //Testing if file is actually open.
@@ -146,11 +243,17 @@ int main(int argc, const char * argv[]){
     
     // Writing the autocorrelation function into a .txt file
     // The specific path was need, as it is otherwise saved in the xcode hidden folder
+    int relaxation_time = -1;
+    int check_var = 1;
     ofstream autocorrelation_file;
     autocorrelation_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Autocorrelation.txt");
     if (autocorrelation_file.is_open()) { cout << "File 'Autocorrelation.txt' is open\n\n"; }
     for(int i=0; i<int(autocorrelation_fraction*max_number_of_interations); i++){
         autocorrelation_file << autocorrelation[i] << '\n';
+        if (autocorrelation[i]<0.3679 && check_var){
+            check_var = 0;
+            relaxation_time = i;
+        }
     }
     autocorrelation_file.close();
     
@@ -189,6 +292,129 @@ int main(int argc, const char * argv[]){
         cout << "E[block " << i+1 << "] = " << block_averages[i] << " +/- " << block_std[i] << '\n';
     }
     
-    cout << "energy change counter = " << iteration_number;
+    cout << "\nRelaxation time = " << relaxation_time << '\n';
+    
+    
+    // (Re)calculation of the energy using Pott's model (H = -J*sum(Kronecker_delta(i,j))
+    E = 0.0;
+    for(int i=0; i<N; i++){
+        for(int j=i+1; j<N; j++){
+            E = E + J[21*i+v[i]][21*j+v[j]];
+        }
+    }
+    
+    // Defining the f_{i,j}(A,B) and f_{i}(A)
+    double f_2D[N][N][max_spin+1][max_spin+1];
+    double C[N][N][max_spin+1][max_spin+1];
+    for (int i=0; i<max_spin+1; i++){
+        for (int j=0; j<max_spin+1; j++){
+            for (int ii=0; ii<N; ii++){
+                for (int jj=0; jj<N; jj++){
+                    f_2D[ii][jj][i][j] = 0.0;
+                    C[ii][jj][i][j] = 0.0;
+                }
+            }
+        }
+    }
+    double f_1D[N][max_spin+1];
+    for (int i=0; i<max_spin+1; i++){
+        for (int j=0; j<N; j++){
+            f_1D[j][i] = 0.0;
+        }
+    }
+    
+    // New round of simulations
+    max_number_of_interations = 1000000;
+    int counter = 0;
+    vector<double> Energy2(max_number_of_interations);
+    iteration_number = 0;
+    for(; iteration_number<max_number_of_interations; iteration_number++){
+        Energy2[iteration_number] = E;
+        auto atom_number = random_atom(rng); //Pick random atom for changing the spin
+        int old_spin = v[atom_number]; //Saving old spin in case we still want to use it
+        double E_old = E;
+        v[atom_number] = random_spin(rng); //Pick random new spin for selected atom
+        if(v[atom_number] == old_spin){
+            continue; // If the spin didn't change, we do nothing
+        }
+        // Calculation of the new energy (new, more efficient algorithm)
+        for(int i=0; i<N; i++){
+            if (atom_number==i){
+                continue;
+            }
+            E = E + J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
+            E = E - J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
+        }
+        
+        if(E > E_old){
+            double uniform_random_0_1 = (double)rand()/(double)RAND_MAX;
+            double prob = exp(-(E-E_old)/(K_b*T));
+            if (prob < uniform_random_0_1){
+                // With some small probability, we revert the change (Metropolis algorithm)
+                E = E_old;
+                v[atom_number] = old_spin;
+            }
+        }
+        if (iteration_number % (3*relaxation_time) == 0){ // We wait for 3 times the relaxation time before we take another measurement
+            counter++;
+            for (int j=0; j<N; j++){
+                f_1D[j][v[j]]++;
+            }
+            for (int j=0; j<N; j++){
+                for (int i=0; i<N; i++){
+                    f_2D[j][i][v[j]][v[i]]++;
+                }
+            }
+        }
+    }
+    
+    
+    // converting f_1D and f_2D to probabilities
+    for (int i=0; i<max_spin+1; i++){
+        for (int j=0; j<max_spin+1; j++){
+            for (int ii=0; ii<N; ii++){
+                for (int jj=0; jj<N; jj++){
+                    f_2D[ii][jj][i][j] /= max_number_of_interations;
+                }
+            }
+        }
+    }
+    for (int i=0; i<max_spin+1; i++){
+        for (int j=0; j<N; j++){
+            f_1D[j][i] /= max_number_of_interations;
+        }
+    }
+    
+    for (int i=0; i<max_spin+1; i++){
+        for (int j=0; j<max_spin+1; j++){
+            for (int ii=0; ii<N; ii++){
+                for (int jj=0; jj<N; jj++){
+                    C[ii][jj][i][j] = f_2D[ii][jj][i][j] - f_1D[ii][i]*f_1D[jj][j];
+                    cout << C[ii][jj][i][j] << '\n';
+                }
+            }
+        }
+    }
+    
+    
+    // Writing the autocorrelation function into a .txt file
+    // The specific path was need, as it is otherwise saved in the xcode hidden folder
+    ofstream C_file;
+    C_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/C.txt");
+    if (C_file.is_open()){
+        cout << "File 'C.txt' is open\n\n";
+        for (int i=0; i<max_spin+1; i++){
+            for (int j=0; j<max_spin+1; j++){
+                for (int ii=0; ii<N; ii++){
+                    for (int jj=0; jj<N; jj++){
+                        C_file << C[ii][jj][i][j] << '\n';
+                    }
+                }
+            }
+        }
+    }
+    C_file.close();
+    
+    
     return 0;
 }
