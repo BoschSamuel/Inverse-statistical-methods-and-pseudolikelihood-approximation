@@ -19,6 +19,7 @@ using namespace std;
 
 
 int main(int argc, const char * argv[]){
+    
     random_device rd;  // only used once to initialise (seed) engine
     mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
@@ -195,7 +196,7 @@ int main(int argc, const char * argv[]){
         cout << "E[block " << i+1 << "] = " << block_averages[i] << " +/- " << block_std[i] << '\n';
     }
     
-    cout << "\nRelaxation time = " << relaxation_time << '\n';
+    cout << "\nRelaxation time = " << 1.0*relaxation_time/N << '\n';
     
     
     // (Re)calculation of the energy using Pott's model (H = -J*sum(Kronecker_delta(i,j))
@@ -206,7 +207,7 @@ int main(int argc, const char * argv[]){
         }
     }
     
-    // Defining the f_{i,j}(A,B) and f_{i}(A)
+    // Defining the f_{i,j}(A,B) and f_{i}(A) functions
     double f_2D[N][N][max_spin+1][max_spin+1];
     double C[N][N][max_spin+1][max_spin+1];
     for (int i=0; i<max_spin+1; i++){
@@ -221,8 +222,8 @@ int main(int argc, const char * argv[]){
     }
     double f_1D[N][max_spin+1];
     for (int i=0; i<max_spin+1; i++){
-        for (int j=0; j<N; j++){
-            f_1D[j][i] = 0.0;
+        for (int ii=0; ii<N; ii++){
+            f_1D[ii][i] = 0.0;
         }
     }
     
@@ -245,8 +246,8 @@ int main(int argc, const char * argv[]){
             if (atom_number==i){
                 continue;
             }
-            E = E + J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
-            E = E - J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
+            E += J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
+            E -= J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
         }
         
         if(E > E_old){
@@ -277,14 +278,16 @@ int main(int argc, const char * argv[]){
         for (int j=0; j<max_spin+1; j++){
             for (int ii=0; ii<N; ii++){
                 for (int jj=0; jj<N; jj++){
-                    f_2D[ii][jj][i][j] /= max_number_of_interations;
+                    f_2D[ii][jj][i][j] /= counter;
+                    cout << f_2D[ii][jj][i][j] << '\n';
                 }
             }
         }
     }
     for (int i=0; i<max_spin+1; i++){
         for (int j=0; j<N; j++){
-            f_1D[j][i] /= max_number_of_interations;
+            f_1D[j][i] /= counter;
+            cout << f_1D[j][i] << '\n';
         }
     }
     
