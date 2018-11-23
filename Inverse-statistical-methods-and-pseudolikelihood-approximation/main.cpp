@@ -19,7 +19,7 @@ using namespace std;
 
 
 int main(int argc, const char * argv[]){
-    
+
     random_device rd;  // only used once to initialise (seed) engine
     mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
@@ -105,15 +105,15 @@ int main(int argc, const char * argv[]){
     for(int iteration_number=0; iteration_number<max_number_of_interations; iteration_number++){
         // cout << Energy[iteration_number] << '\n';
     }
-    
+
     cout << endl;
     //cout << "Energy(" << iteration_number << ")" << " = " << E << "\n";
     cout << '\n';
 
     double mean = accumulate(begin(Energy), end(Energy), 0.0) / Energy.size();
     //cout << "Average Energy = " << mean << '\n';
-    
-    
+
+
     // Writing the Energy vs step number into a .txt file
     // The specific path was need, as it is otherwise saved in the xcode hidden folder
     ofstream energy_file;
@@ -124,9 +124,9 @@ int main(int argc, const char * argv[]){
         energy_file << Energy[i] << '\n';
     }
     energy_file.close();
-    
-    
-    
+
+
+
 // Autocorrelation function
     double autocorrelation_fraction = 0.03; // Through what fraction of the data do you want the autocorr. function to go?
     vector<double> autocorrelation((int)(autocorrelation_fraction*max_number_of_interations));
@@ -144,14 +144,16 @@ int main(int argc, const char * argv[]){
         autocorrelation[i] /= normalisation_factor;
     }
 
-    
+
     // Writing the autocorrelation function into a .txt file
     // The specific path was need, as it is otherwise saved in the xcode hidden folder
     int relaxation_time = -1;
     int check_var = 1;
     ofstream autocorrelation_file;
     autocorrelation_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/Autocorrelation.txt");
-    if (autocorrelation_file.is_open()) { cout << "File 'Autocorrelation.txt' is open\n\n"; }
+    if (autocorrelation_file.is_open()) {
+        cout << "File 'Autocorrelation.txt' is open\n\n";
+    }
     for(int i=0; i<int(autocorrelation_fraction*max_number_of_interations); i++){
         autocorrelation_file << autocorrelation[i] << '\n';
         if (autocorrelation[i]<0.3679 && check_var){
@@ -160,8 +162,8 @@ int main(int argc, const char * argv[]){
         }
     }
     autocorrelation_file.close();
-    
-    
+
+
     // The blocking method analysis
     int n = 10; //number of blocks
     n++;
@@ -206,7 +208,7 @@ int main(int argc, const char * argv[]){
             E = E + J[21*i+v[i]][21*j+v[j]];
         }
     }
-    
+
     // Defining the f_{i,j}(A,B) and f_{i}(A) functions
     double f_2D[N][N][max_spin+1][max_spin+1];
     double C[N][N][max_spin+1][max_spin+1];
@@ -226,7 +228,7 @@ int main(int argc, const char * argv[]){
             f_1D[ii][i] = 0.0;
         }
     }
-    
+
     // New round of simulations
     max_number_of_interations = 10000000;
     int counter = 0;
@@ -249,7 +251,7 @@ int main(int argc, const char * argv[]){
             E += J[21*i+v[i]][21*atom_number+v[atom_number]]; // Here we add the new energy
             E -= J[21*i+v[i]][21*atom_number+old_spin]; // Here we substract the old energy
         }
-        
+
         if(E > E_old){
             double uniform_random_0_1 = (double)rand()/(double)RAND_MAX;
             double prob = exp(-(E-E_old)/(K_b*T));
@@ -271,15 +273,15 @@ int main(int argc, const char * argv[]){
             }
         }
     }
-    
-    
+
+
     // converting f_1D and f_2D to probabilities
     for (int i=0; i<max_spin+1; i++){
         for (int j=0; j<max_spin+1; j++){
             for (int ii=0; ii<N; ii++){
                 for (int jj=0; jj<N; jj++){
                     f_2D[ii][jj][i][j] /= counter;
-                    cout << f_2D[ii][jj][i][j] << '\n';
+                    // cout << f_2D[ii][jj][i][j] << '\n';
                 }
             }
         }
@@ -287,22 +289,22 @@ int main(int argc, const char * argv[]){
     for (int i=0; i<max_spin+1; i++){
         for (int j=0; j<N; j++){
             f_1D[j][i] /= counter;
-            cout << f_1D[j][i] << '\n';
+            // cout << f_1D[j][i] << '\n';
         }
     }
-    
+
     for (int i=0; i<max_spin+1; i++){
         for (int j=0; j<max_spin+1; j++){
             for (int ii=0; ii<N; ii++){
                 for (int jj=0; jj<N; jj++){
                     C[ii][jj][i][j] = f_2D[ii][jj][i][j] - f_1D[ii][i]*f_1D[jj][j];
-                    // cout << C[ii][jj][i][j] << '\n';
+                    cout << C[ii][jj][i][j] << '\n';
                 }
             }
         }
     }
-    
-    
+
+
     // Writing the autocorrelation function into a .txt file
     // The specific path was need, as it is otherwise saved in the xcode hidden folder
     ofstream C_file;
@@ -322,7 +324,16 @@ int main(int argc, const char * argv[]){
         }
     }
     C_file.close();
-    
-    
+
+
     return 0;
 }
+
+
+
+
+
+
+
+
+
