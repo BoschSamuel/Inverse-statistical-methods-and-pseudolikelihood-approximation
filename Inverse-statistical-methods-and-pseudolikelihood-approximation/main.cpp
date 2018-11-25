@@ -19,13 +19,13 @@ using namespace std;
 
 
 int main(int argc, const char * argv[]){
-
+    
     random_device rd;  // only used once to initialise (seed) engine
     mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
     int min_spin = 0;  // min value spin can take
     int max_spin = 20; // max value spin can take
     int N = 25;        //Number of atoms in molecule
-    double T = 1;  // This is the temperature of the experiment
+    double T = 20;  // This is the temperature of the experiment
     // double K_b = 1.38064852e-23; // Boltzman constant
     double K_b = 1;
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
@@ -230,7 +230,7 @@ int main(int argc, const char * argv[]){
     }
 
     // New round of simulations
-    max_number_of_interations = 10000000;
+    max_number_of_interations = 100000000;
     int counter = 0;
     vector<double> Energy2(max_number_of_interations);
     iteration_number = 0;
@@ -298,7 +298,7 @@ int main(int argc, const char * argv[]){
             for (int ii=0; ii<N; ii++){
                 for (int jj=0; jj<N; jj++){
                     C[ii][jj][i][j] = f_2D[ii][jj][i][j] - f_1D[ii][i]*f_1D[jj][j];
-                    cout << C[ii][jj][i][j] << '\n';
+                    // cout << C[ii][jj][i][j] << '\n';
                 }
             }
         }
@@ -313,6 +313,7 @@ int main(int argc, const char * argv[]){
         cout << "File 'C.txt' is open\n\n";
         C_file << max_spin << '\n';
         C_file << N << '\n';
+        C_file << 1/(K_b*T) << '\n';
         for (int i=0; i<max_spin+1; i++){
             for (int j=0; j<max_spin+1; j++){
                 for (int ii=0; ii<N; ii++){
