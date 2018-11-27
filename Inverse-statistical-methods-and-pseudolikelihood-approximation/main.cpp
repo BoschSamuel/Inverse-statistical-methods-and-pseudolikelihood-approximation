@@ -25,13 +25,15 @@ int main(int argc, const char * argv[]){
     int min_spin = 0;  // min value spin can take
     int max_spin = 20; // max value spin can take
     int N = 25;        //Number of atoms in molecule
-    double T = 20;  // This is the temperature of the experiment
-    // double K_b = 1.38064852e-23; // Boltzman constant
-    double K_b = 1;
+    double T = 0.3;  // This is the temperature of the experiment
+    double K_b = 1; // Don't change this
+    double beta = 1/(K_b*T);
+    string T_str = to_string(T);
     uniform_int_distribution<int> random_spin(min_spin,max_spin); // definition of random function
     uniform_int_distribution<int> random_atom(0,N-1); // definition of random function
-
-    array<array<double, 525>, 525> J;
+    // (max_spin-min_spin+1)*N
+    // array<array<double, 525>, 525> J;
+    double J[(max_spin-min_spin+1)*N][(max_spin-min_spin+1)*N];
     ifstream myfile;
     myfile.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/J.txt");
     if(!myfile){ //Testing if file is actually open.
@@ -40,8 +42,8 @@ int main(int argc, const char * argv[]){
     }else{
         cout << "File 'J.txt' is open" << "\n\n";
     }
-    for (int i = 0; i < 525; i++){
-        for(int j = 0; j < 525; ++j){
+    for (int i = 0; i < (max_spin-min_spin+1)*N; i++){
+        for(int j = 0; j < (max_spin-min_spin+1)*N; ++j){
             myfile >> J[i][j]; // Here we read the file number by number
         }
     }
@@ -65,9 +67,9 @@ int main(int argc, const char * argv[]){
     cout << "\nEnergy(initial)" << " = " << E << "\n\n";
 
     //cout << "\nStarting random iterations...\n";
-    int max_number_of_interations = 100000;
+    long max_number_of_interations = 100000;
     vector<double> Energy(max_number_of_interations);
-    int iteration_number = 0;
+    long iteration_number = 0;
     for(; iteration_number<max_number_of_interations; iteration_number++){
         Energy[iteration_number] = E;
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
@@ -231,11 +233,9 @@ int main(int argc, const char * argv[]){
 
     // New round of simulations
     max_number_of_interations = 100000000;
-    int counter = 0;
-    vector<double> Energy2(max_number_of_interations);
+    long counter = 0;
     iteration_number = 0;
     for(; iteration_number<max_number_of_interations; iteration_number++){
-        Energy2[iteration_number] = E;
         auto atom_number = random_atom(rng); //Pick random atom for changing the spin
         int old_spin = v[atom_number]; //Saving old spin in case we still want to use it
         double E_old = E;
@@ -308,12 +308,21 @@ int main(int argc, const char * argv[]){
     // Writing the autocorrelation function into a .txt file
     // The specific path was need, as it is otherwise saved in the xcode hidden folder
     ofstream C_file;
-    C_file.open("/Users/samuelbosch/OneDrive/Faks/EPFL_M1/Computer_simulation/Project/Inverse-statistical-methods-and-pseudolikelihood-approximation/C.txt");
+    string s1 = "C_T_";
+    string s2 = "_counter_";
+    string s3 = ".txt";
+    string counter_str = to_string(counter);
+    string filename = s1 + T_str + s2 + counter_str + s3;
+    cout << filename << "\n\n\n";
+    C_file.open(filename);
     if (C_file.is_open()){
         cout << "File 'C.txt' is open\n\n";
         C_file << max_spin << '\n';
         C_file << N << '\n';
-        C_file << 1/(K_b*T) << '\n';
+        C_file << beta << '\n';
+        C_file << counter << '\n';
+        C_file << 1.0*relaxation_time/N << '\n';
+        C_file << max_number_of_interations << '\n';
         for (int i=0; i<max_spin+1; i++){
             for (int j=0; j<max_spin+1; j++){
                 for (int ii=0; ii<N; ii++){
@@ -329,12 +338,6 @@ int main(int argc, const char * argv[]){
 
     return 0;
 }
-
-
-
-
-
-
 
 
 
