@@ -1,7 +1,7 @@
 # Inverse statistical methods and pseudolikelihoodapproximation
 Samuel Bosch
 
-Mentors: prof. Paolo De Los Rios Dr. Stefano Zamuner
+Supervizors: prof. Paolo De Los Rios Dr. Stefano Zamuner
 
 
 Inverse statistical methods and pseudolikelihood approximation
